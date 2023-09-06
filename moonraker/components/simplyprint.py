@@ -637,7 +637,7 @@ class SimplyPrint(Subscribable):
             self._update_state("error")
             kconn: KlippyConnection
             kconn = self.server.lookup_component("klippy_connection")
-            self.send_sp("printer_error", {"error": kconn.state_message, "error_code": kconn.state_code})
+            self.send_sp("printer_error", {"error": kconn.state_message, "error_code": kconn.state_code, "error_variables": kconn.state_variables})
         self.send_sp("connection", {"new": "connected"})
         self._send_firmware_data()
 
@@ -645,7 +645,7 @@ class SimplyPrint(Subscribable):
         self._update_state("error")
         kconn: KlippyConnection
         kconn = self.server.lookup_component("klippy_connection")
-        self.send_sp("printer_error", {"error": kconn.state_message, "error_code": kconn.state_code})
+        self.send_sp("printer_error", {"error": kconn.state_message, "error_code": kconn.state_code, "error_variables": kconn.state_variables})
 
     def _on_klippy_disconnected(self) -> None:
         self._update_state("offline")

@@ -79,6 +79,7 @@ class KlippyConnection:
         self._state: str = "disconnected"
         self._state_message: str = "Klippy Disconnected"
         self._state_code: str = "-1"
+        self._state_variables: List[Any] = ["test", "test2"]
         self.subscriptions: Dict[Subscribable, Subscription] = {}
         self.subscription_cache: Dict[str, Dict[str, Any]] = {}
         # Setup remote methods accessable to Klippy.  Note that all
@@ -117,6 +118,10 @@ class KlippyConnection:
     @property
     def state_code(self) -> str:
         return self._state_code
+
+    @property
+    def state_variables(self) -> List[Any]:
+        return self._state_variables
 
     @property
     def klippy_info(self) -> Dict[str, Any]:
@@ -369,6 +374,8 @@ class KlippyConnection:
             self._state_message = self._klippy_info["state_message"]
         if "state_code" in self._klippy_info:
             self._state_code = self._klippy_info["state_code"]
+        if "state_variables" in self._klippy_info:
+            self._state_variables = self._klippy_info["state_variables"]
         if "state" not in result:
             return
         if send_id:
@@ -388,7 +395,8 @@ class KlippyConnection:
             self._klippy_started = True
             if self._state != "ready":
                 logging.info("\n" + self._state_message)
-                logging.info("\n" + self._state_code)
+                logging.info("\n" + self._state_code) 
+                logging.info("\n" + str(self._state_variables))
                 if self._state == "shutdown" and startup_state != "shutdown":
                     # Klippy shutdown during startup event
                     self.server.send_event("server:klippy_shutdown")
@@ -493,11 +501,13 @@ class KlippyConnection:
         for field, item in status.items():
             self.subscription_cache.setdefault(field, {}).update(item)
         if 'webhooks' in status:
-            wh: Dict[str, str] = status['webhooks'] # HINT: state_code has to be a string
+            wh: Dict[str, Any] = status['webhooks']
             if "state_message" in wh:
                 self._state_message = wh["state_message"]
             if "state_code" in wh:
                 self._state_code = wh["state_code"]
+            if "state_variables" in wh:
+                self._state_variables = wh["state_variables"]
             # XXX - process other states (startup, ready, error, etc)?
             if "state" in wh:
                 state = wh["state"]
@@ -683,6 +693,7 @@ class KlippyConnection:
         self._state = "disconnected"
         self._state_message = "Klippy Disconnected"
         self._state_code = "-1"
+        self._state_variables = []
         for request in self.pending_requests.values():
             request.set_exception(ServerError("Klippy Disconnected", 503))
         self.pending_requests = {}

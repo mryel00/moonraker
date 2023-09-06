@@ -1083,6 +1083,7 @@ class WelcomeHandler(tornado.web.RequestHandler):
             "service_name": svc_info.get("unit_name", "unknown"),
             "hostname": self.server.get_host_info()["hostname"],
             "klipper_code": kinfo.get("state_code", kstate),
+            "klipper_variables": kinfo.get("state_variables", kstate),
         }
         app: MoonrakerApp = self.server.lookup_component("application")
         welcome_template = await app.load_template("welcome.html")
